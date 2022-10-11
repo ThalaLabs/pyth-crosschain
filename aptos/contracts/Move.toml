@@ -5,19 +5,14 @@ upgrade_policy = "compatible"
 
 [dependencies]
 # TODO: pin versions before mainnet release
-AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "main" }
-MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib/", rev = "main" }
-AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib/", rev = "main" }
-AptosToken = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-token/", rev = "main" }
-Wormhole = { git = "https://github.com/wormhole-foundation/wormhole.git", subdir = "aptos/wormhole", rev = "aptos/integration" }
-Deployer = { git = "https://github.com/wormhole-foundation/wormhole.git", subdir = "aptos/deployer", rev = "aptos/integration" }
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
+MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
+AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
+AptosToken = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-token/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
+Wormhole = { git = "https://github.com/ThalaLabs/wormhole.git", subdir = "aptos/wormhole", rev = "aptos/integration" }
+Deployer = { git = "https://github.com/ThalaLabs/wormhole.git", subdir = "aptos/deployer", rev = "aptos/integration" }
 
 [addresses]
-pyth = "_"
-deployer = "_"
-wormhole = "_"
-
-[dev-addresses]
 pyth = "0xe2f37b8ac45d29d5ea23eb7d16dd3f7a7ab6426f5a998d6c23ecd3ae8d9d29eb"
 deployer = "0x277fa055b6a73c42c0662d5236c65c864ccbf2d4abd21f174a30c8b786eab84b"
 wormhole = "0x251011524cd0f76881f16e7c2d822f0c1c9510bfd2430ba24e1b3d52796df204"
