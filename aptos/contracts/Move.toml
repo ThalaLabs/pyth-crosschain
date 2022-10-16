@@ -5,10 +5,10 @@ upgrade_policy = "compatible"
 
 [dependencies]
 # TODO: pin versions before mainnet release
-AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
-MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
-AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
-AptosToken = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-token/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
+# AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
+# MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
+# AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
+# AptosToken = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-token/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
 Wormhole = { git = "https://github.com/ThalaLabs/wormhole.git", subdir = "aptos/wormhole", rev = "aptos/integration" }
 Deployer = { git = "https://github.com/ThalaLabs/wormhole.git", subdir = "aptos/deployer", rev = "aptos/integration" }
 
