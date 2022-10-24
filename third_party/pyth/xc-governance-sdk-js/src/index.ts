@@ -1,12 +1,14 @@
 export {
   DataSource,
+  AptosAuthorizeUpgradeContractInstruction,
   EthereumUpgradeContractInstruction,
   HexString20Bytes,
   HexString32Bytes,
   SetDataSourcesInstruction,
   SetFeeInstruction,
-  SetGovernanceDataSourceInstruction,
-  SetValidPeriodInstruction
+  SetValidPeriodInstruction,
+  RequestGovernanceDataSourceTransferInstruction,
+  AuthorizeGovernanceDataSourceTransferInstruction
 } from "./instructions"
 
 export {

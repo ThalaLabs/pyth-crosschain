@@ -1,4 +1,4 @@
-import { ChainId } from "@certusone/wormhole-sdk";
+import { ChainId, CHAINS } from "@certusone/wormhole-sdk";
 
 import {  Serializable, BufferBuilder } from "./serialize";
 
@@ -9,10 +9,11 @@ enum Module {
 
 enum TargetAction {
   UpgradeContract = 0,
-  SetGovernanceDataSource,
+  AuthorizeGovernanceDataSourceTransfer,
   SetDataSources,
   SetFee,
   SetValidPeriod,
+  RequestGovernanceDataSourceTransfer,
 }
 
 abstract class HexString implements Serializable {
@@ -100,6 +101,19 @@ abstract class TargetInstruction extends Instruction {
   }
 }
 
+export class AptosAuthorizeUpgradeContractInstruction extends TargetInstruction {
+  constructor(
+    targetChainId: ChainId,
+    private hash: HexString32Bytes,
+  ) {
+    super(TargetAction.UpgradeContract, targetChainId);
+  }
+
+  protected serializePayload(): Buffer {
+    return this.hash.serialize();
+  }
+}
+
 export class EthereumUpgradeContractInstruction extends TargetInstruction {
   constructor(
     targetChainId: ChainId,
@@ -113,20 +127,16 @@ export class EthereumUpgradeContractInstruction extends TargetInstruction {
   }
 }
 
-export class SetGovernanceDataSourceInstruction extends TargetInstruction {
+export class AuthorizeGovernanceDataSourceTransferInstruction extends TargetInstruction {
   constructor(
     targetChainId: ChainId,
-    private governanceDataSource: DataSource,
-    private initialSequence: bigint,
+    private claimVaa: Buffer,
   ) {
-    super(TargetAction.SetGovernanceDataSource, targetChainId);
+    super(TargetAction.AuthorizeGovernanceDataSourceTransfer, targetChainId);
   }
 
   protected serializePayload(): Buffer {
-    return new BufferBuilder()
-      .addObject(this.governanceDataSource)
-      .addBigUint64(this.initialSequence)
-      .build();
+    return this.claimVaa;
   }
 }
 
@@ -174,6 +184,21 @@ export class SetValidPeriodInstruction extends TargetInstruction {
   protected serializePayload(): Buffer {
     return new BufferBuilder()
       .addBigUint64(this.newValidPeriod)
+      .build();
+  }
+}
+
+export class RequestGovernanceDataSourceTransferInstruction extends TargetInstruction {
+  constructor(
+    targetChainId: ChainId,
+    private governanceDataSourceIndex: number,
+  ) {
+    super(TargetAction.RequestGovernanceDataSourceTransfer, targetChainId);
+  }
+
+  protected serializePayload(): Buffer {
+    return new BufferBuilder()
+      .addUint32(this.governanceDataSourceIndex)
       .build();
   }
 }

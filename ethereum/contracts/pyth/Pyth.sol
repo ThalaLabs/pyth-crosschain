@@ -14,11 +14,11 @@ import "./PythInternalStructs.sol";
 abstract contract Pyth is PythGetters, PythSetters, AbstractPyth {
     using BytesLib for bytes;
 
-    function initialize(
+    function _initialize(
         address wormhole,
         uint16 pyth2WormholeChainId,
         bytes32 pyth2WormholeEmitter
-    ) virtual public {
+    ) internal {
         setWormhole(wormhole);
         setPyth2WormholeChainId(pyth2WormholeChainId);
         setPyth2WormholeEmitter(pyth2WormholeEmitter);
@@ -57,9 +57,8 @@ abstract contract Pyth is PythGetters, PythSetters, AbstractPyth {
     }
 
     function updatePriceFeeds(bytes[] calldata updateData) public override payable {
-        uint requiredFee = getUpdateFee(updateData.length);
+        uint requiredFee = getUpdateFee(updateData);
         require(msg.value >= requiredFee, "insufficient paid fee amount");
-        payable(msg.sender).transfer(msg.value - requiredFee);
  
         for(uint i = 0; i < updateData.length; i++) {
             updatePriceBatchFromVm(updateData[i]);
@@ -68,8 +67,13 @@ abstract contract Pyth is PythGetters, PythSetters, AbstractPyth {
         emit UpdatePriceFeeds(msg.sender, updateData.length, requiredFee);
     }
 
-    function getUpdateFee(uint updateDataSize) public override view returns (uint feeAmount) {
+    /// This method is deprecated, please use the `getUpdateFee(bytes[])` instead.
+    function getUpdateFee(uint updateDataSize) public view returns (uint feeAmount) {
         return singleUpdateFeeInWei() * updateDataSize;
+    }
+
+    function getUpdateFee(bytes[] calldata updateData) public override view returns (uint feeAmount) {
+        return singleUpdateFeeInWei() * updateData.length;
     }
 
     function createNewPriceInfo(PythInternalStructs.PriceAttestation memory pa) private view returns (PythInternalStructs.PriceInfo memory info) {
@@ -222,7 +226,7 @@ abstract contract Pyth is PythGetters, PythSetters, AbstractPyth {
     function queryPriceFeed(bytes32 id) public view override returns (PythStructs.PriceFeed memory priceFeed){
         // Look up the latest price info for the given ID
         PythInternalStructs.PriceInfo memory info = latestPriceInfo(id);
-        require(info.priceFeed.id != 0, "no price feed found for the given price id");
+        require(info.priceFeed.id != 0, "price feed for the given id is not pushed or does not exist");
 
         return info.priceFeed;
     }
@@ -236,17 +240,7 @@ abstract contract Pyth is PythGetters, PythSetters, AbstractPyth {
         return validTimePeriodSeconds();
     }
 
-    function isPyth() internal pure returns (bool) {
-        return true;
-    }
-
     function version() public pure returns (string memory) {
         return "1.1.0";
-    }
-
-    function deployCommitHash() public pure returns (string memory) {
-        // This is a place holder for the commit hash and will be replaced
-        // with the commit hash upon deployment.
-        return "__DEPLOY_COMMIT_HASH_PLACEHOLER__";
     }
 }

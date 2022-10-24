@@ -44,43 +44,66 @@ abstract contract PythGovernance is PythGetters, PythSetters, PythGovernanceInst
 
         if (gi.action == GovernanceAction.UpgradeContract) {
             require(gi.targetChainId != 0, "upgrade with chain id 0 is not possible");
-            upgradeContract(gi.payload);
-        } else if (gi.action == GovernanceAction.SetGovernanceDataSource) {
-            setGovernanceDataSource(gi.payload);
+            upgradeContract(parseUpgradeContractPayload(gi.payload));
+        } else if (gi.action == GovernanceAction.AuthorizeGovernanceDataSourceTransfer) {
+            AuthorizeGovernanceDataSourceTransfer(parseAuthorizeGovernanceDataSourceTransferPayload(gi.payload));
         } else if (gi.action == GovernanceAction.SetDataSources) {
-            setDataSources(gi.payload);
+            setDataSources(parseSetDataSourcesPayload(gi.payload));
         } else if (gi.action == GovernanceAction.SetFee) {
-            setFee(gi.payload);
+            setFee(parseSetFeePayload(gi.payload));
         } else if (gi.action == GovernanceAction.SetValidPeriod) {
-            setValidPeriod(gi.payload);
+            setValidPeriod(parseSetValidPeriodPayload(gi.payload));
+        } else if (gi.action == GovernanceAction.RequestGovernanceDataSourceTransfer) {
+            revert("RequestGovernanceDataSourceTransfer can be only part of AuthorizeGovernanceDataSourceTransfer message");
         } else {
             revert("invalid governance action");
         }
     }
 
-    function upgradeContract(bytes memory encodedPayload) internal {
-        UpgradeContractPayload memory payload = parseUpgradeContractPayload(encodedPayload); 
-        // This contract does not have enough access to execute this, it should be executed on the
-        // upgradable
+    function upgradeContract(UpgradeContractPayload memory payload) internal {
+        // This method on this contract does not have enough access to execute this, it should be executed on the
+        // upgradable contract.
         upgradeUpgradableContract(payload);
     }
 
     function upgradeUpgradableContract(UpgradeContractPayload memory payload) virtual internal;
 
-    function setGovernanceDataSource(bytes memory encodedPayload) internal {
-        SetGovernanceDataSourcePayload memory payload = parseSetGovernanceDataSourcePayload(encodedPayload);
-
+    // Transfer the governance data source to a new value with sanity checks
+    // to ensure the new governance data source can manage the contract.
+    function AuthorizeGovernanceDataSourceTransfer(AuthorizeGovernanceDataSourceTransferPayload memory payload) internal {
         PythInternalStructs.DataSource memory oldGovernanceDatSource = governanceDataSource();
 
-        setGovernanceDataSource(payload.newGovernanceDataSource);
-        setLastExecutedGovernanceSequence(payload.initialSequence);
+        // Make sure the claimVaa is a valid VAA with RequestGovernanceDataSourceTransfer governance message
+        // If it's valid then its emitter can take over the governance from the current emitter.
+        // The VAA is checked here to ensure that the new governance data source is valid and can send message
+        // through wormhole.
+        (IWormhole.VM memory vm, bool valid, string memory reason) = wormhole().parseAndVerifyVM(payload.claimVaa);
+        require(valid, reason);
+
+        GovernanceInstruction memory gi = parseGovernanceInstruction(vm.payload);
+        require(gi.targetChainId == chainId() || gi.targetChainId == 0, "invalid target chain for this governance instruction");
+        require(gi.action == GovernanceAction.RequestGovernanceDataSourceTransfer,
+            "governance data source change inner vaa is not of claim action type");
+
+        RequestGovernanceDataSourceTransferPayload memory claimPayload = parseRequestGovernanceDataSourceTransferPayload(gi.payload);
+
+        // Governance data source index is used to prevent replay attacks, so a claimVaa cannot be used twice.
+        require(governanceDataSourceIndex() < claimPayload.governanceDataSourceIndex, 
+            "cannot upgrade to an older governance data source");
+
+        setGovernanceDataSourceIndex(claimPayload.governanceDataSourceIndex);
+
+        PythInternalStructs.DataSource memory newGovernanceDS = PythInternalStructs.DataSource(vm.emitterChainId, vm.emitterAddress);
+
+        setGovernanceDataSource(newGovernanceDS);
+
+        // Setting the last executed governance to the claimVaa sequence to avoid using older sequences.
+        setLastExecutedGovernanceSequence(vm.sequence);
 
         emit GovernanceDataSourceSet(oldGovernanceDatSource, governanceDataSource(), lastExecutedGovernanceSequence());
     }
 
-    function setDataSources(bytes memory encodedPayload) internal {
-        SetDataSourcesPayload memory payload = parseSetDataSourcesPayload(encodedPayload);
-
+    function setDataSources(SetDataSourcesPayload memory payload) internal {
         PythInternalStructs.DataSource[] memory oldDataSources = validDataSources();
 
         for (uint i = 0; i < oldDataSources.length; i += 1) {
@@ -96,18 +119,14 @@ abstract contract PythGovernance is PythGetters, PythSetters, PythGovernanceInst
         emit DataSourcesSet(oldDataSources, validDataSources());
     }
 
-    function setFee(bytes memory encodedPayload) internal {
-        SetFeePayload memory payload = parseSetFeePayload(encodedPayload);
-
+    function setFee(SetFeePayload memory payload) internal {
         uint oldFee = singleUpdateFeeInWei();
         setSingleUpdateFeeInWei(payload.newFee);
 
         emit FeeSet(oldFee, singleUpdateFeeInWei());
     }
 
-    function setValidPeriod(bytes memory encodedPayload) internal {
-        SetValidPeriodPayload memory payload = parseSetValidPeriodPayload(encodedPayload);
-
+    function setValidPeriod(SetValidPeriodPayload memory payload) internal {
         uint oldValidPeriod = validTimePeriodSeconds();
         setValidTimePeriodSeconds(payload.newValidPeriod);
 
