@@ -5,15 +5,9 @@ upgrade_policy = "compatible"
 
 [dependencies]
 # TODO: pin versions before mainnet release
-AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-framework/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
-MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/move-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
-AptosStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-stdlib/", rev = "6d375306122da45a38eb9a6c95625ce2b7f64cbc" }
-AptosToken = { git = "https://github.com/aptos-labs/aptos-core.git", subdir = "aptos-move/framework/aptos-token/", rev = "985f19d40457a5f09f2d741b1feca6bf7ba1f8a6" }
 Wormhole = { git = "https://github.com/ThalaLabs/wormhole.git", subdir = "aptos/wormhole", rev = "aptos/integration" }
 Deployer = { git = "https://github.com/ThalaLabs/wormhole.git", subdir = "aptos/deployer", rev = "aptos/integration" }
 
 [addresses]
 # These are testnet addresses. source: https://docs.pyth.network/consume-data/aptos
 pyth = "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387"
-deployer = "0xb31e712b26fd295357355f6845e77c888298636609e93bc9b05f0f604049f434"
-wormhole = "0x5bc11445584a763c1fa7ed39081f1b920954da14e04b32440cba863d03e19625"
